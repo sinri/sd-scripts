@@ -6,3 +6,13 @@ venv
 build
 .vscode
 wandb
+
+
+workspace/*/source_img
+workspace/*/trained_model
+workspace/lxq/diffusers_model
+workspace/lxq/trained_model
+workspace/anya/cache
+workspace/anya/source_img
+workspace/anya/trained_model
+

@@ -1,0 +1,21 @@
+[general]
+enable_bucket = true                        # Aspect Ratio Bucketingを使うか否か
+
+[[datasets]]
+resolution = 512                            # 学習解像度
+batch_size = 4                              # バッチサイズ
+
+  [[datasets.subsets]]
+  image_dir = 'E:\sinri\sd-scripts\workspace\lxq2\source_img\mix'                     # 学習用画像を入れたフォルダを指定
+  class_tokens = 'LeXiaoQi_v2'                # identifier class を指定
+  caption_extension = '.txt'
+  num_repeats = 25                          # 学習用画像の繰り返し回数
+
+
+  # 以下は正則化画像を用いる場合のみ記述する。用いない場合は削除する
+  [[datasets.subsets]]
+  is_reg = true
+  image_dir = 'E:\sinri\sd-scripts\workspace\lxq2\source_img\reg'                      # 正則化画像を入れたフォルダを指定
+  class_tokens = 'LeXiaoQi_v2'                     # class を指定
+  num_repeats = 1                           # 正則化画像の繰り返し回数、基本的には1でよい
+#  metadata_file = 'E:\sinri\sd-scripts\workspace\lxq\source_img\reg\lxq_md.json'
