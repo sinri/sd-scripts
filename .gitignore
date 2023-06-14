@@ -10,6 +10,7 @@ wandb
 
 workspace/*/source_img
 workspace/*/trained_model
+workspace/*/output
 workspace/lxq/diffusers_model
 workspace/lxq/trained_model
 workspace/anya/cache
