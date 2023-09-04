@@ -88,7 +88,7 @@ class KohyaSSImageGenerator:
             bf16: bool = False,
             # such as torch.float32,
 
-            tokenizer_cache_dir:Optional[str]=None,
+            tokenizer_cache_dir: Optional[str] = None,
     ):
         """
 
@@ -120,7 +120,17 @@ class KohyaSSImageGenerator:
         Returns:
 
         """
-        built_args = self.__build_args()
+        parameters = {
+            'v2':model_meta.v2,
+            'v_parameterization':model_meta.v_parameterization,
+            'prompt':prompt_meta.prompt,
+            'from_file':prompt_meta.from_file,
+            'interactive':interactive_meta.interactive,
+            'no_preview':interactive_meta.no_preview,
+            'image_path':img2img_meta.image_path,
+            'mask_path':img2img_meta.mask_path,
+        }
+        built_args = argparse.Namespace(**parameters)
 
         if fp16:
             dtype = torch.float16
