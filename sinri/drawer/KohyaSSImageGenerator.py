@@ -52,14 +52,7 @@ class KohyaSSImageGenerator:
     def __init__(self):
         pass
 
-    def __build_args(self, **kwargs) -> argparse.Namespace:
-        """
-        tokenizer_cache_dir
-        """
-        # todo seems ok
-        return argparse.Namespace(**kwargs)
-
-    def main(
+    def execute(
             self,
             model_meta: ModelMeta,
             W: int,
@@ -121,14 +114,66 @@ class KohyaSSImageGenerator:
 
         """
         parameters = {
-            'v2':model_meta.v2,
-            'v_parameterization':model_meta.v_parameterization,
-            'prompt':prompt_meta.prompt,
-            'from_file':prompt_meta.from_file,
-            'interactive':interactive_meta.interactive,
-            'no_preview':interactive_meta.no_preview,
-            'image_path':img2img_meta.image_path,
-            'mask_path':img2img_meta.mask_path,
+            'v2': model_meta.v2,
+            'v_parameterization': model_meta.v_parameterization,
+            'prompt': prompt_meta.prompt,
+            'from_file': prompt_meta.from_file,
+            'interactive': interactive_meta.interactive,
+            'no_preview': interactive_meta.no_preview,
+            'image_path': img2img_meta.image_path,
+            'mask_path': img2img_meta.mask_path,
+            'strength': img2img_meta.strength,
+            'images_per_prompt': batch_draw_meta.images_per_prompt,
+            'outdir': output_meta.outdir,
+            'sequential_file_name': output_meta.sequential_file_name,
+            'use_original_file_name': output_meta.use_original_file_name,
+            'n_iter': batch_draw_meta.n_iter,
+            'H': H,
+            'W': W,
+            'batch_size': batch_draw_meta.batch_size,
+            'vae_batch_size': vae_meta.vae_batch_size,
+            'vae_slices': vae_meta.vae_slices,
+            'steps': steps,
+            'sampler': sampler,
+            'scale': prompt_meta.scale,
+            'ckpt': model_meta.ckpt,
+            'tokenizer_cache_dir': tokenizer_cache_dir,
+            'seed': seed,
+            'iter_same_seed': batch_draw_meta.iter_same_seed,
+            'fp16': fp16,
+            'bf16': bf16,
+            'xformers': xformers,
+            'diffusers_xformers': diffusers_xformers,
+            'opt_channels_last': opt_channels_last,
+            'network_module': network_meta.network_module,
+            'network_weights': network_meta.network_weights,
+            'network_mul': network_meta.network_mul,
+            'network_args': network_meta.network_args,
+            'network_show_meta': network_meta.network_show_meta,
+            'network_merge': network_meta.network_merge,
+            'network_pre_calc': network_meta.network_pre_calc,
+            'textual_inversion_embeddings': textual_inversion_meta.textual_inversion_embeddings,
+            'XTI_embeddings': textual_inversion_meta.XTI_embeddings,
+            'clip_skip': clip_meta.clip_skip,
+            'max_embeddings_multiples': prompt_meta.max_embeddings_multiples,
+            'clip_guidance_scale': clip_meta.clip_guidance_scale,
+            'clip_image_guidance_scale': clip_meta.clip_image_guidance_scale,
+            'vgg16_guidance_scale': vgg_meta.vgg16_guidance_scale,
+            'vgg16_guidance_layer': vgg_meta.vgg16_guidance_layer,
+            'guide_image_path': clip_meta.guide_image_path,
+            'highres_fix_scale': highres_fix_upscaler_meta.highres_fix_scale,
+            'highres_fix_steps': highres_fix_upscaler_meta.highres_fix_steps,
+            'highres_fix_strength': highres_fix_upscaler_meta.highres_fix_strength,
+            'highres_fix_save_1st': highres_fix_upscaler_meta.highres_fix_save_1st,
+            'highres_fix_latents_upscaling': highres_fix_upscaler_meta.highres_fix_latents_upscaling,
+            'highres_fix_upscaler': highres_fix_upscaler_meta.highres_fix_upscaler,
+            'highres_fix_upscaler_args': highres_fix_upscaler_meta.highres_fix_upscaler_args,
+            'highres_fix_disable_control_net': highres_fix_upscaler_meta.highres_fix_disable_control_net,
+            'negative_scale': prompt_meta.negative_scale,
+            'control_net_models': control_net_meta.control_net_models,
+            'control_net_preps': control_net_meta.control_net_preps,
+            'control_net_weights': control_net_meta.control_net_weights,
+            'control_net_ratios': control_net_meta.control_net_ratios,
         }
         built_args = argparse.Namespace(**parameters)
 
