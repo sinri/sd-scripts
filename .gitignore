@@ -7,6 +7,7 @@ build
 .vscode
 wandb
 
+.idea/
 
 workspace/*/source_img
 workspace/*/trained_model
