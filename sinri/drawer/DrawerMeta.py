@@ -119,6 +119,7 @@ class ModelMeta:
 class PromptMeta:
     def __init__(self,
                  prompt: Optional[str] = None,
+                 negative_prompt: Optional[str] = None,
                  from_file: Optional[str] = None,
                  max_embeddings_multiples: Optional[int] = None,
                  scale: float = 7.5,
@@ -134,6 +135,9 @@ class PromptMeta:
             negative_scale: set another guidance scale for negative prompt / ネガティブプロンプトのscaleを指定する
         """
         self.prompt = prompt
+        # todo --n negative_prompt
+        if negative_prompt is not None and negative_scale != '' and self.prompt is not None:
+            self.prompt += ' --n ' + negative_prompt
         self.from_file = from_file
         self.max_embeddings_multiples = max_embeddings_multiples
         self.scale = scale
