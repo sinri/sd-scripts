@@ -101,7 +101,6 @@ class ModelMeta:
     def __init__(self,
                  ckpt: str,
                  v2: bool = False,
-
                  v_parameterization: bool = False,
                  ):
         """
@@ -216,14 +215,14 @@ class NetworkMeta:
                  network_pre_calc: bool = False,
                  network_mul: Optional[List[float]] = None,
                  network_args: Optional[List[str]] = None,
-                 network_weights: Optional[List[float]] = None,
+                 network_weights: Optional[List[str]] = None,
                  network_merge: bool = False,
                  network_show_meta: bool = False,
                  ):
         """
 
         Args:
-            network_module: additional network module to use / 追加ネットワークを使う時そのモジュール名
+            network_module: additional network module to use / 追加ネットワークを使う時そのモジュール名 such as `networks.lora`
             network_pre_calc: pre-calculate network for generation / ネットワークのあらかじめ計算して生成する
             network_mul: additional network multiplier / 追加ネットワークの効果の倍率
             network_args: additional argmuments for network (key=value) / ネットワークへの追加の引数

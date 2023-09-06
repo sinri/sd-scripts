@@ -6,7 +6,7 @@ import os
 import random
 import re
 import time
-from typing import List, Union, Optional
+from typing import List, Optional
 
 import PIL
 import diffusers
@@ -48,9 +48,6 @@ class KohyaSSImageGenerator:
     # その他の設定
     LATENT_CHANNELS = 4
     DOWNSAMPLING_FACTOR = 8
-
-    def __init__(self):
-        pass
 
     def execute(
             self,
@@ -177,6 +174,8 @@ class KohyaSSImageGenerator:
         }
         built_args = argparse.Namespace(**parameters)
 
+        paths_of_saved_images = []
+
         if fp16:
             dtype = torch.float16
         elif bf16:
@@ -226,7 +225,7 @@ class KohyaSSImageGenerator:
 
         if clip_meta.clip_guidance_scale > 0.0 or clip_meta.clip_image_guidance_scale:
             print("prepare clip model")
-            clip_model = CLIPModel.from_pretrained(self.CLIP_MODEL_PATH, torch_dtype=dtype)
+            clip_model = CLIPModel.from_pretrained(KohyaSSImageGenerator.CLIP_MODEL_PATH, torch_dtype=dtype)
         else:
             clip_model = None
 
@@ -297,10 +296,10 @@ class KohyaSSImageGenerator:
             scheduler_module.torch = TorchRandReplacer(noise_manager)
 
         scheduler = scheduler_cls(
-            num_train_timesteps=self.SCHEDULER_TIMESTEPS,
-            beta_start=self.SCHEDULER_LINEAR_START,
-            beta_end=self.SCHEDULER_LINEAR_END,
-            beta_schedule=self.SCHEDLER_SCHEDULE,
+            num_train_timesteps=KohyaSSImageGenerator.SCHEDULER_TIMESTEPS,
+            beta_start=KohyaSSImageGenerator.SCHEDULER_LINEAR_START,
+            beta_end=KohyaSSImageGenerator.SCHEDULER_LINEAR_END,
+            beta_schedule=KohyaSSImageGenerator.SCHEDLER_SCHEDULE,
             **sched_init_args,
         )
 
@@ -1003,7 +1002,9 @@ class KohyaSSImageGenerator:
                     else:
                         fln = f"im_{ts_str}_{highres_prefix}{i:03d}_{seed}.png"
 
-                    image.save(os.path.join(output_meta.outdir, fln), pnginfo=metadata)
+                    x = os.path.join(output_meta.outdir, fln)
+                    image.save(x, pnginfo=metadata)
+                    paths_of_saved_images.append(x)
 
                 if not interactive_meta.no_preview and not highres_1st and interactive_meta.interactive:
                     try:
@@ -1236,6 +1237,7 @@ class KohyaSSImageGenerator:
                 batch_data.clear()
 
         print("done!")
+        return paths_of_saved_images
 
     @staticmethod
     def replace_unet_modules(unet: diffusers.models.unet_2d_condition.UNet2DConditionModel, mem_eff_attn, xformers):
