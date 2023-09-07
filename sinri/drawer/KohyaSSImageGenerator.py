@@ -248,38 +248,38 @@ class KohyaSSImageGenerator:
         # schedulerを用意する
         sched_init_args = {}
         scheduler_num_noises_per_step = 1
-        if sampler == "ddim":
+        if sampler == "ddim" or sampler == 'DDIM':
             scheduler_cls = DDIMScheduler
             scheduler_module = diffusers.schedulers.scheduling_ddim
-        elif sampler == "ddpm":  # ddpmはおかしくなるのでoptionから外してある
+        elif sampler == "ddpm" or sampler == 'DDPM':  # ddpmはおかしくなるのでoptionから外してある
             scheduler_cls = DDPMScheduler
             scheduler_module = diffusers.schedulers.scheduling_ddpm
-        elif sampler == "pndm":
+        elif sampler == "pndm" or sampler == 'PNDM':
             scheduler_cls = PNDMScheduler
             scheduler_module = diffusers.schedulers.scheduling_pndm
-        elif sampler == "lms" or sampler == "k_lms":
+        elif sampler == "lms" or sampler == "k_lms" or sampler == 'LMS':
             scheduler_cls = LMSDiscreteScheduler
             scheduler_module = diffusers.schedulers.scheduling_lms_discrete
-        elif sampler == "euler" or sampler == "k_euler":
+        elif sampler == "euler" or sampler == "k_euler" or sampler == 'Euler':
             scheduler_cls = EulerDiscreteScheduler
             scheduler_module = diffusers.schedulers.scheduling_euler_discrete
-        elif sampler == "euler_a" or sampler == "k_euler_a":
+        elif sampler == "euler_a" or sampler == "k_euler_a" or sampler == 'Euler a':
             scheduler_cls = EulerAncestralDiscreteScheduler
             scheduler_module = diffusers.schedulers.scheduling_euler_ancestral_discrete
-        elif sampler == "dpmsolver" or sampler == "dpmsolver++":
+        elif sampler == "dpmsolver" or sampler == "dpmsolver++" or sampler == 'DPM++ 2M':
             scheduler_cls = DPMSolverMultistepScheduler
             sched_init_args["algorithm_type"] = sampler
             scheduler_module = diffusers.schedulers.scheduling_dpmsolver_multistep
         elif sampler == "dpmsingle":
             scheduler_cls = DPMSolverSinglestepScheduler
             scheduler_module = diffusers.schedulers.scheduling_dpmsolver_singlestep
-        elif sampler == "heun":
+        elif sampler == "heun" or sampler == 'Heun':
             scheduler_cls = HeunDiscreteScheduler
             scheduler_module = diffusers.schedulers.scheduling_heun_discrete
-        elif sampler == "dpm_2" or sampler == "k_dpm_2":
+        elif sampler == "dpm_2" or sampler == "k_dpm_2" or sampler == 'DPM2':
             scheduler_cls = KDPM2DiscreteScheduler
             scheduler_module = diffusers.schedulers.scheduling_k_dpm_2_discrete
-        elif sampler == "dpm_2_a" or sampler == "k_dpm_2_a":
+        elif sampler == "dpm_2_a" or sampler == "k_dpm_2_a" or sampler == 'DPM2 a':
             scheduler_cls = KDPM2AncestralDiscreteScheduler
             scheduler_module = diffusers.schedulers.scheduling_k_dpm_2_ancestral_discrete
             scheduler_num_noises_per_step = 2

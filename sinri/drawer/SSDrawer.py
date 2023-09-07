@@ -44,7 +44,7 @@ class SSDrawer(KohyaSSImageGenerator):
         self.__parameters['model_meta'] = ModelMeta(**model_meta)
         return self
 
-    def load_size(self, width: int, height: int):
+    def set_size(self, width: int, height: int):
         self.__parameters['W'] = width
         self.__parameters['H'] = height
         return self
@@ -59,15 +59,22 @@ class SSDrawer(KohyaSSImageGenerator):
 
     def set_prompt(self, positive_content: str, positive_scale: float, negative_content: Optional[str] = None,
                    negative_scale: Optional[str] = None):
-        k = {}
+        k = {
+            'max_embeddings_multiples': 1,
+        }
         if positive_content:
             k['prompt'] = positive_content
+            if 70 * k['max_embeddings_multiples'] < len(positive_content):
+                k['max_embeddings_multiples'] = int(len(positive_content) / 70) + 1
         if positive_scale:
             k['scale'] = positive_scale
         if negative_content:
             k['negative_prompt'] = negative_content
+            if 70 * k['max_embeddings_multiples'] < len(negative_content):
+                k['max_embeddings_multiples'] = int(len(negative_content) / 70) + 1
         if negative_scale:
             k['negative_scale'] = negative_scale
+
         self.__parameters['prompt_meta'] = PromptMeta(**k)
         return self
 
@@ -105,12 +112,12 @@ class SSDrawer(KohyaSSImageGenerator):
         network_meta = network_dict.get(key, {})
         self.__networks.append({
             'network_module': network_meta.get('network_module', 'networks.lora'),
-            'network_mul': network_mul,
             'network_weight': network_meta.get('path'),
+            'network_mul': network_mul,
         })
         return self
 
-    def draw(self):
+    def draw(self) -> str:
         self.__parameters['textual_inversion_meta'] = TextualInversionMeta(
             textual_inversion_embeddings=self.__textual_inversion_embeddings if len(
                 self.__textual_inversion_embeddings) > 0 else None,
