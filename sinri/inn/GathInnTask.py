@@ -25,7 +25,11 @@ class GathInnTask:
 
         logger.info(f'drawn and saved to {output_file}')
 
-        with open(output_file, 'rb') as file_to_upload:
+        inn_file = f'{env.inn_output_folder}{os.sep}{self.__row["application_id"]}.png'
+        os.rename(output_file, inn_file)
+        logger.info(f'renamed to inn file {inn_file}')
+
+        with open(inn_file, 'rb') as file_to_upload:
             files = {'file': file_to_upload}
             values = env.inn_gibeah_verification
 
@@ -33,7 +37,8 @@ class GathInnTask:
             print(f'uploaded: {r.status_code} | {r.text}')
 
         # remove
-        os.remove(output_file)
+        os.remove(inn_file)
+        print(f'removed inn file')
 
     def __draw_an_image(self):
         if not os.path.isdir(env.inn_output_folder):
@@ -69,6 +74,6 @@ class GathInnTask:
 
         lora_rows = self.__row.get('lora_rows')
         for lora_row in lora_rows:
-            self.__drawer.add_network(key=lora_row['lora'],network_mul=lora_row['lora_multiplier'])
+            self.__drawer.add_network(key=lora_row['lora'], network_mul=lora_row['lora_multiplier'])
 
         return self.__drawer.draw()

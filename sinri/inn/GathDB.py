@@ -107,6 +107,7 @@ class GathDB:
             {
                 'status': 'RUNNING',
                 'start_time': MySQLAnyTable.now(),
+                'image_format': 'png',
             }
         )
         if not result.is_executed():

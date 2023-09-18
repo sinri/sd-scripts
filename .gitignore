@@ -18,5 +18,4 @@ workspace/anya/cache
 workspace/anya/source_img
 workspace/anya/trained_model
 
-/workspace/gen/out/
-/workspace/gen/env.py
+/workspace/gen/

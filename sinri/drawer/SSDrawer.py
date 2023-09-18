@@ -11,31 +11,37 @@ class SSDrawer(KohyaSSImageGenerator):
         self.__parameters: dict = {}
         self.__textual_inversion_embeddings: List[str] = []
         self.__networks: List[dict] = []
+        self.__network_pre_calc = False
+        self.__network_merge = False
+        self.__network_show_meta = False
 
         self.reset_all()
 
     def reset_all(self):
         self.__parameters = {
             'xformers': True,
-            'W': 512,
-            'H': 512,
+            'the_width': 512,
+            'the_height': 512,
             'sampler': 'euler_a',
-            'steps': 20,
-            'fp16': True,
+            'the_steps': 20,
+            # 'fp16': True,
         }
         self.__textual_inversion_embeddings = []
         self.__networks = []
+        self.__network_pre_calc = False
+        self.__network_merge = False
+        self.__network_show_meta = False
 
     def set_xformers_switch(self, use_xformers: bool):
-        self.__parameters['xformers'] = use_xformers
+        self.__parameters['xformers'] = bool(use_xformers)
         return self
 
     def set_fp16_switch(self, use_fp16: bool):
-        self.__parameters['fp16'] = use_fp16
+        self.__parameters['fp16'] = bool(use_fp16)
         return self
 
     def set_bp16_switch(self, use_bp16: bool):
-        self.__parameters['bp16'] = use_bp16
+        self.__parameters['bp16'] = bool(use_bp16)
         return self
 
     def set_model(self, key: str):
@@ -45,8 +51,8 @@ class SSDrawer(KohyaSSImageGenerator):
         return self
 
     def set_size(self, width: int, height: int):
-        self.__parameters['W'] = width
-        self.__parameters['H'] = height
+        self.__parameters['the_width'] = int(width)
+        self.__parameters['the_height'] = int(height)
         return self
 
     def set_sampler(self, sampler: str):
@@ -54,7 +60,7 @@ class SSDrawer(KohyaSSImageGenerator):
         return self
 
     def set_steps(self, steps: int):
-        self.__parameters['steps'] = steps
+        self.__parameters['the_steps'] = int(steps)
         return self
 
     def set_prompt(self, positive_content: str, positive_scale: float, negative_content: Optional[str] = None,
@@ -67,13 +73,13 @@ class SSDrawer(KohyaSSImageGenerator):
             if 70 * k['max_embeddings_multiples'] < len(positive_content):
                 k['max_embeddings_multiples'] = int(len(positive_content) / 70) + 1
         if positive_scale:
-            k['scale'] = positive_scale
+            k['scale'] = float(positive_scale)
         if negative_content:
             k['negative_prompt'] = negative_content
             if 70 * k['max_embeddings_multiples'] < len(negative_content):
                 k['max_embeddings_multiples'] = int(len(negative_content) / 70) + 1
         if negative_scale:
-            k['negative_scale'] = negative_scale
+            k['negative_scale'] = float(negative_scale)
 
         self.__parameters['prompt_meta'] = PromptMeta(**k)
         return self
@@ -92,12 +98,12 @@ class SSDrawer(KohyaSSImageGenerator):
 
     def set_clip_skip(self, clip_skip: int):
         self.__parameters['clip_meta'] = ClipMeta(
-            clip_skip=clip_skip
+            clip_skip=int(clip_skip)
         )
         return self
 
     def set_seed(self, seed: int):
-        self.__parameters['seed'] = seed
+        self.__parameters['the_seed'] = int(seed)
         return self
 
     def add_textual_inversion(self, key: str):
@@ -113,30 +119,50 @@ class SSDrawer(KohyaSSImageGenerator):
         self.__networks.append({
             'network_module': network_meta.get('network_module', 'networks.lora'),
             'network_weight': network_meta.get('path'),
-            'network_mul': network_mul,
+            'network_mul': float(network_mul),
+            'network_pre_calc': bool(network_meta.get('network_pre_calc', False)),
+            'network_merge': bool(network_meta.get('network_merge', False)),
+            'network_show_meta': True,
         })
         return self
 
+    def set_network_flags(self,
+                          network_pre_calc: bool,
+                          network_merge: bool,
+                          network_show_meta: bool,
+                          ):
+        self.__network_merge = network_merge
+        self.__network_show_meta = network_show_meta
+        self.__network_pre_calc = network_pre_calc
+        return self
+
     def draw(self) -> str:
-        self.__parameters['textual_inversion_meta'] = TextualInversionMeta(
-            textual_inversion_embeddings=self.__textual_inversion_embeddings if len(
-                self.__textual_inversion_embeddings) > 0 else None,
-        )
+        if len(self.__textual_inversion_embeddings) > 0:
+            self.__parameters['textual_inversion_meta'] = TextualInversionMeta(
+                textual_inversion_embeddings=self.__textual_inversion_embeddings
+            )
 
-        network_module_list = []
-        network_weight_list = []
-        network_mul_list = []
+        if len(self.__networks)>0:
+            network_parameters = {
+                'network_module': [],  # Optional[List[str]] = None,
+                'network_pre_calc': self.__network_pre_calc,
+                'network_mul': [],  # Optional[List[float]] = None,
+                'network_args': [],  # Optional[List[str]] = None,
+                'network_weights': [],  # Optional[List[str]] = None,
+                'network_merge': self.__network_merge,
+                'network_show_meta': self.__network_show_meta,
+            }
 
-        for network in self.__networks:
-            network_module_list.append(network.get('network_module'))
-            network_weight_list.append(network.get('network_weight'))
-            network_mul_list.append(network.get('network_mul'))
+            for network in self.__networks:
+                network_parameters['network_module'].append(network.get('network_module'))
+                network_parameters['network_weights'].append(network.get('network_weight'))
+                network_parameters['network_mul'].append(network.get('network_mul'))
 
-        self.__parameters['network_meta'] = NetworkMeta(
-            network_module=network_module_list,
-            network_weights=network_weight_list,
-            network_mul=network_mul_list,
-        )
+            self.__parameters['network_meta'] = NetworkMeta(**network_parameters)
+
+        # debug
+        # print('SHOW THY PARAMETERS!')
+        # print(self.__parameters)
 
         files = self.execute(**self.__parameters)
         return files[0]

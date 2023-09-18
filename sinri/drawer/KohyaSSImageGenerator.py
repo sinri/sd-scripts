@@ -52,12 +52,12 @@ class KohyaSSImageGenerator:
     def execute(
             self,
             model_meta: ModelMeta,
-            W: int,
-            H: int,
+            the_width: int,
+            the_height: int,
             prompt_meta: PromptMeta,
             output_meta: OutputMeta,
             sampler: str,
-            steps,
+            the_steps,
             vgg_meta: Vgg16Meta = Vgg16Meta(),
             vae_meta: VaeMeta = VaeMeta(),
             control_net_meta: ControlNetMeta = ControlNetMeta(),
@@ -68,7 +68,7 @@ class KohyaSSImageGenerator:
             network_meta: NetworkMeta = NetworkMeta(),
             batch_draw_meta: BatchDrawMeta = BatchDrawMeta(),
             textual_inversion_meta: TextualInversionMeta = TextualInversionMeta(),
-            seed: Optional[int] = None,
+            the_seed: Optional[int] = None,
 
             diffusers_xformers: bool = False,
             xformers: bool = False,
@@ -84,13 +84,13 @@ class KohyaSSImageGenerator:
 
         Args:
             model_meta:
-            W: image width, in pixel space / 生成画像幅
-            H: image height, in pixel space / 生成画像高さ
+            the_width: image width, in pixel space / 生成画像幅
+            the_height: image height, in pixel space / 生成画像高さ
             prompt_meta:
             output_meta:
             sampler: sampler (scheduler) type / サンプラー（スケジューラ）の種類
-            seed: seed, or seed of seeds in multiple generation / 1枚生成時のseed、または複数枚生成時の乱数seedを決めるためのseed
-            steps: number of ddim sampling steps / サンプリングステップ数
+            the_seed: seed, or seed of seeds in multiple generation / 1枚生成時のseed、または複数枚生成時の乱数seedを決めるためのseed
+            the_steps: number of ddim sampling steps / サンプリングステップ数
             vgg_meta:
             vae_meta:
             control_net_meta:
@@ -125,17 +125,17 @@ class KohyaSSImageGenerator:
             'sequential_file_name': output_meta.sequential_file_name,
             'use_original_file_name': output_meta.use_original_file_name,
             'n_iter': batch_draw_meta.n_iter,
-            'H': H,
-            'W': W,
+            'H': the_height,
+            'W': the_width,
             'batch_size': batch_draw_meta.batch_size,
             'vae_batch_size': vae_meta.vae_batch_size,
             'vae_slices': vae_meta.vae_slices,
-            'steps': steps,
+            'steps': the_steps,
             'sampler': sampler,
             'scale': prompt_meta.scale,
             'ckpt': model_meta.ckpt,
             'tokenizer_cache_dir': tokenizer_cache_dir,
-            'seed': seed,
+            'seed': the_seed,
             'iter_same_seed': batch_draw_meta.iter_same_seed,
             'fp16': fp16,
             'bf16': bf16,
@@ -173,6 +173,9 @@ class KohyaSSImageGenerator:
             'control_net_ratios': control_net_meta.control_net_ratios,
         }
         built_args = argparse.Namespace(**parameters)
+        print('show thy parameters:')
+        print(parameters)
+        print("====================")
 
         paths_of_saved_images = []
 
@@ -682,9 +685,9 @@ class KohyaSSImageGenerator:
                 mask_images = l
 
         # 画像サイズにオプション指定があるときはリサイズする
-        if W is not None and H is not None:
+        if the_width is not None and the_height is not None:
             # highres fix を考慮に入れる
-            w, h = W, H
+            w, h = the_width, the_height
             if highres_fix:
                 w = int(w * highres_fix_upscaler_meta.highres_fix_scale + 0.5)
                 h = int(h * highres_fix_upscaler_meta.highres_fix_scale + 0.5)
@@ -730,21 +733,21 @@ class KohyaSSImageGenerator:
             guide_images = None
 
         # seed指定時はseedを決めておく
-        if seed is not None:
+        if the_seed is not None:
             # dynamic promptを使うと足りなくなる→images_per_promptを適当に大きくしておいてもらう
-            random.seed(seed)
+            random.seed(the_seed)
             predefined_seeds = [random.randint(0, 0x7FFFFFFF) for _ in
                                 range(batch_draw_meta.n_iter * len(prompt_list) * batch_draw_meta.images_per_prompt)]
             if len(predefined_seeds) == 1:
-                predefined_seeds[0] = seed
+                predefined_seeds[0] = the_seed
         else:
             predefined_seeds = None
 
         # デフォルト画像サイズを設定する：img2imgではこれらの値は無視される（またはW*Hにリサイズ済み）
-        if W is None:
-            W = 512
-        if H is None:
-            H = 512
+        if the_width is None:
+            the_width = 512
+        if the_height is None:
+            the_height = 512
 
         # 画像生成のループ
         os.makedirs(output_meta.outdir, exist_ok=True)
@@ -1052,11 +1055,11 @@ class KohyaSSImageGenerator:
 
                     if pi == 0 or len(raw_prompts) > 1:
                         # parse prompt: if prompt is not changed, skip parsing
-                        width = W
-                        height = H
+                        width = the_width
+                        height = the_height
                         scale = prompt_meta.scale
                         negative_scale = prompt_meta.negative_scale
-                        steps = steps
+                        steps = the_steps
                         seed = None
                         seeds = None
                         strength = 0.8 if img2img_meta.strength is None else img2img_meta.strength
