@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from sinri.drawer.DrawerMeta import ModelMeta, OutputMeta, PromptMeta, VaeMeta, TextualInversionMeta, NetworkMeta, \
-    ClipMeta
+    ClipMeta, ControlNetMeta
 from sinri.drawer.KohyaSSImageGenerator import KohyaSSImageGenerator
 
 
@@ -10,10 +10,13 @@ class SSDrawer(KohyaSSImageGenerator):
         self.__env = env
         self.__parameters: dict = {}
         self.__textual_inversion_embeddings: List[str] = []
+
         self.__networks: List[dict] = []
         self.__network_pre_calc = False
         self.__network_merge = False
         self.__network_show_meta = False
+
+        self.__control_net = None
 
         self.reset_all()
 
@@ -136,13 +139,23 @@ class SSDrawer(KohyaSSImageGenerator):
         self.__network_pre_calc = network_pre_calc
         return self
 
+    def set_control_net(self,
+                        control_net_model: str,
+                        guide_image_path: str,
+                        ):
+        self.__control_net = ControlNetMeta(
+            control_net_models=[control_net_model],
+            guide_image_path=[guide_image_path]
+        )
+        return self
+
     def draw(self) -> str:
         if len(self.__textual_inversion_embeddings) > 0:
             self.__parameters['textual_inversion_meta'] = TextualInversionMeta(
                 textual_inversion_embeddings=self.__textual_inversion_embeddings
             )
 
-        if len(self.__networks)>0:
+        if len(self.__networks) > 0:
             network_parameters = {
                 'network_module': [],  # Optional[List[str]] = None,
                 'network_pre_calc': self.__network_pre_calc,
@@ -159,6 +172,9 @@ class SSDrawer(KohyaSSImageGenerator):
                 network_parameters['network_mul'].append(network.get('network_mul'))
 
             self.__parameters['network_meta'] = NetworkMeta(**network_parameters)
+
+        if self.__control_net is not None:
+            self.__parameters['control_net_meta'] = self.__control_net
 
         # debug
         # print('SHOW THY PARAMETERS!')

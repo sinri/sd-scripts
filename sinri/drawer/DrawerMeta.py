@@ -59,11 +59,24 @@ class ClipMeta:
 
 
 class ControlNetMeta:
+    """
+    現在はControlNet 1.0のみ動作確認しています。プリプロセスはCannyのみサポートしています。
+
+    以下のオプションがあります。
+
+    --control_net_models：ControlNetのモデルファイルを指定します。 複数指定すると、それらをstepごとに切り替えて利用します（Web UIのControlNet拡張の実装と異なります）。diffと通常の両方をサポートします。
+    --guide_image_path：ControlNetに使うヒント画像を指定します。--img_pathと同様にフォルダを指定すると、そのフォルダの画像を順次利用します。Canny以外のモデルの場合には、あらかじめプリプロセスを行っておいてください。
+    --control_net_preps：ControlNetのプリプロセスを指定します。--control_net_modelsと同様に複数指定可能です。現在はcannyのみ対応しています。対象モデルでプリプロセスを使用しない場合は none を指定します。 cannyの場合 --control_net_preps canny_63_191のように、閾値1と2を'_'で区切って指定できます。
+    --control_net_weights：ControlNetの適用時の重みを指定します（1.0で通常、0.5なら半分の影響力で適用）。--control_net_modelsと同様に複数指定可能です。
+    --control_net_ratios：ControlNetを適用するstepの範囲を指定します。0.5の場合は、step数の半分までControlNetを適用します。--control_net_modelsと同様に複数指定可能です。
+    """
+
     def __init__(self,
                  control_net_models: Optional[List[str]] = None,
                  control_net_preps: Optional[List[str]] = None,
                  control_net_weights: Optional[List[float]] = None,
                  control_net_ratios: Optional[List[float]] = None,
+                 guide_image_path: Optional[List[str]] = None,
                  ):
         """
 
@@ -77,6 +90,7 @@ class ControlNetMeta:
         self.control_net_preps = control_net_preps
         self.control_net_weights = control_net_weights
         self.control_net_ratios = control_net_ratios
+        self.guide_image_path = guide_image_path
 
 
 class VaeMeta:
@@ -144,9 +158,25 @@ class PromptMeta:
 
 
 class Vgg16Meta:
+    """
+    指定した画像に近づくように画像生成する機能です。
+    通常のプロンプトによる生成指定に加えて、追加でVGG16の特徴量を取得し、生成中の画像が指定したガイド画像に近づくよう、生成される画像をコントロールします。
+    img2imgでの使用をお勧めします（通常の生成では画像がぼやけた感じになります）。
+    CLIP Guided Stable Diffusionの仕組みを流用した独自の機能です。
+    またアイデアはVGGを利用したスタイル変換から拝借しています。
+    なお選択できるサンプラーはDDIM、PNDM、LMSのみとなります。
+
+    --vgg16_guidance_scaleオプションにどの程度、VGG16特徴量を反映するかを数値で指定します。試した感じでは100くらいから始めて増減すると良いようです。
+    --guide_image_pathオプションでguideに使用する画像（ファイルまたはフォルダ）を指定してください。
+
+    複数枚の画像を一括でimg2img変換し、元画像をガイド画像とする場合、--guide_image_pathと--image_pathに同じ値を指定すればOKです。
+    """
+
     def __init__(self,
+                 guide_image_path: str,
                  vgg16_guidance_scale: float = 0.0,
                  vgg16_guidance_layer: int = 20,
+
                  ):
         """
 
@@ -154,6 +184,7 @@ class Vgg16Meta:
             vgg16_guidance_scale: enable VGG16 guided SD by image, scale for guidance / 画像によるVGG16 guided SDを有効にしてこのscaleを適用する
             vgg16_guidance_layer: layer of VGG16 to calculate contents guide (1~30, 20 for conv4_2) / VGG16のcontents guideに使うレイヤー番号 (1~30、20はconv4_2)
         """
+        self.guide_image_path = guide_image_path
         self.vgg16_guidance_scale = vgg16_guidance_scale
         self.vgg16_guidance_layer = vgg16_guidance_layer
 
