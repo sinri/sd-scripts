@@ -58,7 +58,7 @@ class KohyaSSImageGenerator:
             output_meta: OutputMeta,
             sampler: str,
             the_steps,
-            vgg_meta: Vgg16Meta = Vgg16Meta(),
+            vgg_meta: Vgg16Meta = Vgg16Meta(''),
             vae_meta: VaeMeta = VaeMeta(),
             control_net_meta: ControlNetMeta = ControlNetMeta(),
             clip_meta: ClipMeta = ClipMeta(),
